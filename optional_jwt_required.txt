@@ -1,0 +1,36 @@
+from functools import wraps
+from flask import current_app
+from flask_jwt import _jwt_required, current_identity
+
+
+def jwt_optionnal(realm=None):
+    def wrapper(fn):
+        @wraps(fn)
+        def decorator(*args, **kwargs):
+            try:
+                _jwt_required(realm or current_app.config['JWT_DEFAULT_REALM'])
+            except:
+                pass
+            return fn(*args, **kwargs)
+        return decorator
+    return wrapper
+then :
+
+from flask_jwt import current_identity
+
+
+@jwt_optionnal()
+def view():
+  if current_identity:
+    [...]
+
+###################################################
+pyjwt
+
+pip install pyjwt
+
+>>> jwt.encode({'some': 'payload'}, 'secret', algorithm='HS256')
+'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb21lIjoicGF5bG9hZCJ9.4twFt5NiznN84AWoo1d7KO1T_yoc0Z6XOpOVswacPZg'
+
+>>> jwt.decode('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzb21lIjoicGF5bG9hZCJ9.4twFt5NiznN84AWoo1d7KO1T_yoc0Z6XOpOVswacPZg', 'secret')
+{'some': 'payload'}
