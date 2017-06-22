@@ -1,3 +1,5 @@
+from werkzeug.security import generate_password_hash, check_password_hash
+
 from db import db
 
 class UserModel(db.Model):
@@ -6,13 +8,16 @@ class UserModel(db.Model):
     
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80))
-    password = db.Column(db.String(80))
+    pw_hash = db.Column(db.String(255))
     active = db.Column(db.Boolean(create_constraint=True))
 
     def __init__(self, username, password, active):
         self.username = username
-        self.password = password
+        self.pw_hash  = generate_password_hash(password)
         self.active = active
+    
+    def check_password(self, password):
+        return check_password_hash(self.pw_hash , password)
     
     def json(self):
         return {'username': self.username, 'active': self.active}
